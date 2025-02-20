@@ -41,6 +41,7 @@ async function run() {
       res.send(result);
     });
 
+    // save task in db
     app.post("/tasks", async (req, res) => {
       const task = req.body;
       const newTask = { ...task, timestamp: new Date() };

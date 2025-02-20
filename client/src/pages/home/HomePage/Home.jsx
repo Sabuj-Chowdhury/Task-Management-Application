@@ -1,18 +1,10 @@
-import { useEffect, useState } from "react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import Column from "./Column";
+import axios from "axios";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import TaskCards from "../TaskCardByCategory/TaskCards";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Home = () => {
-  const [tasks, setTasks] = useState({
-    "To-Do": [],
-    "In Progress": [],
-    Done: [],
-  });
-
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -20,32 +12,7 @@ const Home = () => {
   });
 
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_URL}/tasks`);
-      console.log("Raw Response:", response);
-
-      if (!response.ok)
-        throw new Error(`HTTP Error! Status: ${response.status}`);
-
-      const data = await response.json();
-      console.log("Fetched Data:", data);
-
-      const formattedTasks = { "To-Do": [], "In Progress": [], Done: [] };
-      data.forEach((task) => {
-        formattedTasks[task.category].push(task);
-      });
-
-      setTasks(formattedTasks);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    }
-  };
+  const queryClient = useQueryClient(); // React Query Cache
 
   const addTask = async (e) => {
     e.preventDefault();
@@ -61,73 +28,23 @@ const Home = () => {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_URL}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTask),
-      });
-
-      console.log("Response Status:", response.status);
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
-      const savedTask = await response.json();
-      console.log("Saved Task:", savedTask);
-
-      setTasks((prevTasks) => ({
-        ...prevTasks,
-        [savedTask.category]: [...prevTasks[savedTask.category], savedTask],
-      }));
-
+      await axios.post(`${import.meta.env.VITE_URL}/tasks`, newTask);
+      toast.success("Added Successfully!");
       setNewTask({ title: "", description: "", category: "To-Do" });
-    } catch (error) {
-      console.error("Error adding task:", error.message);
-      setError(error.message);
-    }
-  };
 
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-    if (!over) return;
-
-    const fromCategory = active.data.current.category;
-    const toCategory = over.data.current.category;
-
-    if (fromCategory !== toCategory) {
-      setTasks((prevTasks) => {
-        const fromList = prevTasks[fromCategory].filter(
-          (task) => task._id !== active.id
-        );
-        const movedTask = prevTasks[fromCategory].find(
-          (task) => task._id === active.id
-        );
-        const updatedTask = { ...movedTask, category: toCategory };
-
-        fetch(`${import.meta.env.VITE_API_URL}/tasks/${active.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedTask),
-        });
-
-        const toList = [...prevTasks[toCategory], updatedTask];
-
-        return {
-          ...prevTasks,
-          [fromCategory]: fromList,
-          [toCategory]: toList,
-        };
-      });
+      queryClient.invalidateQueries(["tasks"]); // 🔥 Refetch tasks after adding
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed!");
     }
   };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-teal-400 via-fuchsia-500 to-yellow-500 py-8 px-4">
-      <div className="w-11/12 mx-auto">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold text-white">Task Board</h1>
-          <button className="bg-red-500 text-white px-4 py-2 rounded-md">
+          <button className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition">
             LogOut
           </button>
         </div>
@@ -135,67 +52,60 @@ const Home = () => {
         {/* Task Form */}
         <form
           onSubmit={addTask}
-          className="bg-white p-4 rounded-lg shadow-md mb-6 flex flex-col gap-4"
+          className="bg-white p-4 rounded-lg shadow-md mb-6"
         >
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+          )}
 
-          <input
-            type="text"
-            placeholder="Task Title (max 50 characters)"
-            value={newTask.title}
-            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-            className="p-2 border rounded-md"
-            required
-            maxLength="50"
-          />
+          <div className="flex flex-col md:flex-row items-center gap-3">
+            <input
+              type="text"
+              placeholder="Task Title"
+              value={newTask.title}
+              onChange={(e) =>
+                setNewTask({ ...newTask, title: e.target.value })
+              }
+              className="p-3 border rounded-md outline-none flex-1 focus:ring-2 focus:ring-blue-500 w-full md:w-auto"
+              required
+              maxLength="50"
+            />
 
-          <textarea
-            placeholder="Task Description (optional, max 200 characters)"
-            value={newTask.description}
-            onChange={(e) =>
-              setNewTask({ ...newTask, description: e.target.value })
-            }
-            className="p-2 border rounded-md"
-            maxLength="200"
-          />
+            <input
+              type="text"
+              placeholder="Task Description (optional)"
+              value={newTask.description}
+              onChange={(e) =>
+                setNewTask({ ...newTask, description: e.target.value })
+              }
+              className="p-3 border rounded-md outline-none flex-1 focus:ring-2 focus:ring-blue-500 w-full md:w-auto"
+              maxLength="200"
+            />
 
-          <select
-            value={newTask.category}
-            onChange={(e) =>
-              setNewTask({ ...newTask, category: e.target.value })
-            }
-            className="p-2 border rounded-md"
-          >
-            <option value="To-Do">To-Do</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Done">Done</option>
-          </select>
+            <select
+              value={newTask.category}
+              onChange={(e) =>
+                setNewTask({ ...newTask, category: e.target.value })
+              }
+              className="p-3 border rounded-md outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto"
+            >
+              <option value="To-Do">To-Do</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Done">Done</option>
+            </select>
 
-          <button
-            type="submit"
-            className="bg-blue-500 text-white p-2 rounded-md"
-          >
-            Add Task
-          </button>
-        </form>
-
-        <DndContext
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Object.keys(tasks).map((category) => (
-              <SortableContext
-                key={category}
-                items={tasks[category]}
-                strategy={verticalListSortingStrategy}
-              >
-                <Column title={category} tasks={tasks[category]} />
-              </SortableContext>
-            ))}
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-3 rounded-md shadow-md hover:bg-blue-600 transition font-medium w-full md:w-auto"
+            >
+              Add Task
+            </button>
           </div>
-        </DndContext>
+        </form>
       </div>
+
+      {/* Task List */}
+      <TaskCards />
     </main>
   );
 };
