@@ -1,10 +1,18 @@
 import axios from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import TaskCards from "../TaskCardByCategory/TaskCards";
 import { useQueryClient } from "@tanstack/react-query";
+import AuthContext from "../../../Context/AuthContext";
+import { useNavigate } from "react-router";
 
 const Home = () => {
+  const { logOut } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const onLogout = async () => {
+    await logOut();
+    navigate("/");
+  };
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -44,7 +52,12 @@ const Home = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold text-white">Task Board</h1>
-          <button className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition">
+          <button
+            onClick={() => {
+              onLogout();
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition"
+          >
             LogOut
           </button>
         </div>
