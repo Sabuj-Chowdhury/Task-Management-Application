@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Spinner from "../../../components/Spinner/Spinner";
 import toast from "react-hot-toast";
+import { Link } from "react-router";
 
 const TaskCards = () => {
   const {
@@ -72,9 +73,13 @@ const TaskCards = () => {
                   >
                     <FaTrash size={18} />
                   </button>
-                  <button className="text-blue-500 hover:text-blue-700 transition">
+
+                  <Link
+                    to={`/task/${task._id}`}
+                    className="text-blue-500 hover:text-blue-700 transition"
+                  >
                     <FaEdit size={18} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

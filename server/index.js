@@ -54,16 +54,37 @@ async function run() {
       const tasks = await taskCollection.find().toArray();
       res.send(tasks);
     });
+    // get task details by id
+    app.get("/tasks/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await taskCollection.findOne(query);
+      res.send(result);
+    });
 
     // ** Update Task Category API (PUT)**
     app.put("/tasks/:id", async (req, res) => {
       const { id } = req.params;
-      const updatedTask = req.body;
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid Task ID" });
+      }
+
+      // Remove `_id` field from the request body to prevent update error
+      const { _id, ...updatedTask } = req.body;
+
       const filter = { _id: new ObjectId(id) };
       const updateDoc = { $set: updatedTask };
 
-      const result = await taskCollection.updateOne(filter, updateDoc);
-      res.send(result);
+      try {
+        const result = await taskCollection.updateOne(filter, updateDoc);
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ error: "Task not found" });
+        }
+        res.json({ message: "Task updated successfully", result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to update task" });
+      }
     });
 
     // ** Delete Task API (DELETE)**

@@ -3,6 +3,7 @@ import ErrorPage from "../components/ErrorPage/ErrorPage";
 import Login from "../pages/Login/LoginPage/Login";
 import Home from "../pages/home/HomePage/Home";
 import PrivateRoute from "./PrivateRoute";
+import TaskUpdate from "../pages/TaskUpdate/TaskUpdate";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,15 @@ const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Home />
+      </PrivateRoute>
+    ),
+  },
+
+  {
+    path: "/task/:id",
+    element: (
+      <PrivateRoute>
+        <TaskUpdate />
       </PrivateRoute>
     ),
   },
