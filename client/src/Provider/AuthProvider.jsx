@@ -4,7 +4,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-
+import axios from "axios";
 import { useEffect, useState } from "react";
 
 import PropTypes from "prop-types";
@@ -34,7 +34,21 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      console.log(currentUser);
+      // console.log(currentUser);
+
+      if (currentUser?.displayName && currentUser.photoURL) {
+        console.log("CurrentUser-->", currentUser.email);
+        const user = {
+          email: currentUser?.email,
+          name: currentUser?.displayName,
+          image: currentUser.photoURL,
+        };
+        // save user data in te DB
+        await axios.post(`${import.meta.env.VITE_URL}/users`, user);
+      } else {
+        //  if no user
+        console.log("CurrentUser-->", null);
+      }
       setLoading(false);
     });
     return () => {

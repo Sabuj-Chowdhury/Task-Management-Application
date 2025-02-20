@@ -22,6 +22,24 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    const db = client.db("todoDB");
+    const userCollection = db.collection("users");
+
+    //save user data in the db
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const isExist = await userCollection.findOne(query);
+      if (isExist) {
+        return res.send({ message: "Already exist", insertedId: null });
+      }
+      const result = await userCollection.insertOne({
+        ...user,
+        timeStamp: Date.now(),
+      });
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
