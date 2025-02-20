@@ -24,6 +24,7 @@ async function run() {
   try {
     const db = client.db("todoDB");
     const userCollection = db.collection("users");
+    const taskCollection = db.collection("tasks");
 
     //save user data in the db
     app.post("/users", async (req, res) => {
@@ -37,6 +38,38 @@ async function run() {
         ...user,
         timeStamp: Date.now(),
       });
+      res.send(result);
+    });
+
+    app.post("/tasks", async (req, res) => {
+      const task = req.body;
+      const newTask = { ...task, timestamp: new Date() };
+      const result = await taskCollection.insertOne(newTask);
+      res.send({ insertedId: result.insertedId, ...newTask });
+    });
+
+    // **Fetch Tasks API (GET)**
+    app.get("/tasks", async (req, res) => {
+      const tasks = await taskCollection.find().toArray();
+      res.send(tasks);
+    });
+
+    // ** Update Task Category API (PUT)**
+    app.put("/tasks/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedTask = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = { $set: updatedTask };
+
+      const result = await taskCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // ** Delete Task API (DELETE)**
+    app.delete("/tasks/:id", async (req, res) => {
+      const { id } = req.params;
+      const filter = { _id: new ObjectId(id) };
+      const result = await taskCollection.deleteOne(filter);
       res.send(result);
     });
 
