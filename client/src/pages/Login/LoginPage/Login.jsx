@@ -1,4 +1,4 @@
-import SocialLogin from "./GoogleLogin/SocialLogin";
+import SocialLogin from "../SocialLogin/SocialLogin";
 
 const Login = () => {
   return (

@@ -10,16 +10,13 @@ const SocialLogin = () => {
   const { signInWithGoogle } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  let location = useLocation();
-
-  let from = location.state?.from?.pathname || "/home";
 
   // handle google sign in
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
       await signInWithGoogle();
-      navigate(from, { replace: true });
+      navigate("/home");
       toast.success("Login Successful!");
     } catch (err) {
       console.log(err);

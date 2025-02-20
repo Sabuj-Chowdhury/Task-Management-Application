@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import { useContext } from "react";
 import AuthContext from "../Context/AuthContext";
-// import LoadingSpinner from "../components/LoadingSpinner/LoadingSpinner";
+import Spinner from "../components/Spinner/Spinner";
 
 const PrivateRoute = ({ children }) => {
   const { loading, user } = useContext(AuthContext);
@@ -12,12 +12,12 @@ const PrivateRoute = ({ children }) => {
   const location = useLocation();
 
   if (loading) {
-    return <div>Loading </div>;
+    return <Spinner />;
   }
   if (user) {
     return children;
   }
-  return <Navigate to="/login" state={{ from: location }} replace></Navigate>;
+  return <Navigate to="/" state={{ from: location }} replace></Navigate>;
 };
 
 PrivateRoute.propTypes = {
