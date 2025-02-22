@@ -70,7 +70,7 @@ const TaskCards = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="max-w-7xl mx-auto my-5 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Object.keys(groupedTasks || {}).map((category) => (
+        {["To-Do", "In Progress", "Done"].map((category) => (
           <Droppable key={category} droppableId={category}>
             {(provided) => (
               <div
@@ -83,51 +83,57 @@ const TaskCards = () => {
                 </h2>
 
                 <div className="flex flex-col gap-4 h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400">
-                  {groupedTasks[category].map((task, index) => (
-                    <Draggable
-                      key={task._id}
-                      draggableId={task._id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="bg-white p-3 shadow-md rounded-lg flex justify-between items-center"
-                        >
-                          <div>
-                            <h3 className="text-lg font-semibold">
-                              {task.title}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {task.description}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              {new Date(task.timestamp).toLocaleString()}
-                            </p>
-                          </div>
+                  {groupedTasks?.[category]?.length > 0 ? (
+                    groupedTasks[category].map((task, index) => (
+                      <Draggable
+                        key={task._id}
+                        draggableId={task._id}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="bg-white p-3 shadow-md rounded-lg flex justify-between items-center"
+                          >
+                            <div>
+                              <h3 className="text-lg font-semibold">
+                                {task.title}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {task.description}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {new Date(task.timestamp).toLocaleString()}
+                              </p>
+                            </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => deleteTask(task._id)}
-                              className="text-red-500 hover:text-red-700 transition"
-                            >
-                              <FaTrash size={18} />
-                            </button>
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => deleteTask(task._id)}
+                                className="text-red-500 hover:text-red-700 transition"
+                              >
+                                <FaTrash size={18} />
+                              </button>
 
-                            <Link
-                              to={`/task/${task._id}`}
-                              className="text-blue-500 hover:text-blue-700 transition"
-                            >
-                              <FaEdit size={18} />
-                            </Link>
+                              <Link
+                                to={`/task/${task._id}`}
+                                className="text-blue-500 hover:text-blue-700 transition"
+                              >
+                                <FaEdit size={18} />
+                              </Link>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
+                        )}
+                      </Draggable>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center mt-5 italic">
+                      No tasks available
+                    </p>
+                  )}
                   {provided.placeholder}
                 </div>
               </div>
