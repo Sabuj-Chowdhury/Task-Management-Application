@@ -17,9 +17,9 @@ const TaskCards = () => {
   } = useQuery({
     queryKey: ["tasks", user?.email],
     queryFn: async () => {
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_URL}/tasks/${user?.email}`
-      );
+      const { data } = await axios.get(`${import.meta.env.VITE_URL}/tasks`, {
+        params: { email: user?.email },
+      });
       return data;
     },
   });

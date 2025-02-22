@@ -49,32 +49,34 @@ async function run() {
       res.send({ insertedId: result.insertedId, ...newTask });
     });
 
-    // **Fetch Tasks API (GET)**
-    app.get("/tasks/:email", async (req, res) => {
-      const email = req.params.email;
-      // console.log(email);
+    app.get("/tasks", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
       const query = { email };
       const tasks = await taskCollection.find(query).toArray();
       res.send(tasks);
     });
+
     // get task details by id
     app.get("/tasks/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await taskCollection.findOne(query);
+      // console.log(result);
       res.send(result);
     });
 
     // ** Update Task Category API (PUT)**
     app.put("/tasks/:id", async (req, res) => {
       const { id } = req.params;
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid Task ID" });
-      }
-      const { _id, ...updatedTask } = req.body;
+
+      const updateTask = req.body;
+      console.log(updateTask);
 
       const filter = { _id: new ObjectId(id) };
-      const updateDoc = { $set: updatedTask };
+      const updateDoc = { $set: updateTask };
 
       try {
         const result = await taskCollection.updateOne(filter, updateDoc);

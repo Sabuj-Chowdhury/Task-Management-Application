@@ -38,7 +38,7 @@ const Home = () => {
     }
 
     const taskData = { ...newTask, email: user?.email };
-    console.log("New Task Data:", taskData);
+    // console.log("New Task Data:", taskData);
 
     try {
       await axios.post(`${import.meta.env.VITE_URL}/tasks`, taskData);
