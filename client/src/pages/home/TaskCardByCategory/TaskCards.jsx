@@ -5,16 +5,21 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Spinner from "../../../components/Spinner/Spinner";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import AuthContext from "../../../Context/AuthContext";
 
 const TaskCards = () => {
+  const { user } = useContext(AuthContext);
   const {
     data: tasks,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", user?.email],
     queryFn: async () => {
-      const { data } = await axios.get(`${import.meta.env.VITE_URL}/tasks`);
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_URL}/tasks/${user?.email}`
+      );
       return data;
     },
   });

@@ -50,8 +50,11 @@ async function run() {
     });
 
     // **Fetch Tasks API (GET)**
-    app.get("/tasks", async (req, res) => {
-      const tasks = await taskCollection.find().toArray();
+    app.get("/tasks/:email", async (req, res) => {
+      const email = req.params.email;
+      // console.log(email);
+      const query = { email };
+      const tasks = await taskCollection.find(query).toArray();
       res.send(tasks);
     });
     // get task details by id
@@ -68,8 +71,6 @@ async function run() {
       if (!ObjectId.isValid(id)) {
         return res.status(400).json({ error: "Invalid Task ID" });
       }
-
-      // Remove `_id` field from the request body to prevent update error
       const { _id, ...updatedTask } = req.body;
 
       const filter = { _id: new ObjectId(id) };
