@@ -7,7 +7,8 @@ import AuthContext from "../../../Context/AuthContext";
 import { useNavigate } from "react-router";
 
 const Home = () => {
-  const { logOut } = useContext(AuthContext);
+  const { logOut, user } = useContext(AuthContext);
+  // console.log(user.email);
   const navigate = useNavigate();
   const onLogout = async () => {
     await logOut();
@@ -17,6 +18,7 @@ const Home = () => {
     title: "",
     description: "",
     category: "To-Do",
+    email: user?.email || "",
   });
 
   const [error, setError] = useState("");
@@ -35,12 +37,20 @@ const Home = () => {
       return;
     }
 
-    try {
-      await axios.post(`${import.meta.env.VITE_URL}/tasks`, newTask);
-      toast.success("Added Successfully!");
-      setNewTask({ title: "", description: "", category: "To-Do" });
+    const taskData = { ...newTask, email: user?.email };
+    console.log("New Task Data:", taskData);
 
-      queryClient.invalidateQueries(["tasks"]); // 🔥 Refetch tasks after adding
+    try {
+      await axios.post(`${import.meta.env.VITE_URL}/tasks`, taskData);
+      toast.success("Added Successfully!");
+      setNewTask({
+        title: "",
+        description: "",
+        category: "To-Do",
+        email: user?.email,
+      });
+
+      queryClient.invalidateQueries(["tasks"]); // Refetch tasks after adding
     } catch (err) {
       console.log(err);
       toast.error("Failed!");
