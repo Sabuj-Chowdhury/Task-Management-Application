@@ -91,13 +91,24 @@ const TaskUpdate = () => {
             <option value="Done">Done</option>
           </select>
 
-          <button
-            type="submit"
-            className="bg-blue-500 text-white py-3 rounded-md shadow-md hover:bg-blue-600 transition font-medium"
-            disabled={loading}
-          >
-            {loading ? "Updating..." : "Update Task"}
-          </button>
+          {/* Buttons: Update and Cancel */}
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-3 rounded-md shadow-md hover:bg-blue-600 transition font-medium flex-1"
+              disabled={loading}
+            >
+              {loading ? "Updating..." : "Update Task"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/home")}
+              className="bg-gray-400 text-white py-3 rounded-md shadow-md hover:bg-gray-500 transition font-medium flex-1"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>
