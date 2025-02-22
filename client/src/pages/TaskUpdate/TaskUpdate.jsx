@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Spinner from "../../components/Spinner/Spinner";
 import toast from "react-hot-toast";
 
@@ -26,10 +26,15 @@ const TaskUpdate = () => {
       const { data } = await axios.get(
         `${import.meta.env.VITE_URL}/tasks/${id}`
       );
-      setUpdatedTask(data); // Set initial values
       return data;
     },
   });
+
+  useEffect(() => {
+    if (task) {
+      setUpdatedTask(task);
+    }
+  }, [task]); // Set task only when `task` is updated
 
   // console.log(task);
 
@@ -38,10 +43,11 @@ const TaskUpdate = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`${import.meta.env.VITE_URL}/tasks/${id}`, updatedTask);
+      const { _id, ...updatedData } = updatedTask; // Remove `_id`
+      await axios.put(`${import.meta.env.VITE_URL}/tasks/${id}`, updatedData);
       toast.success("Task Updated Successfully!");
-      refetch(); // Refresh task data
-      navigate("/home"); // Redirect to home
+      refetch(); // Refresh data
+      navigate("/home"); // Redirect
     } catch (error) {
       console.error(error);
       toast.error("Update Failed!");

@@ -72,20 +72,26 @@ async function run() {
     app.put("/tasks/:id", async (req, res) => {
       const { id } = req.params;
 
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+      }
+
       const updateTask = req.body;
-      console.log(updateTask);
+      console.log("Received Update Data:", updateTask);
 
       const filter = { _id: new ObjectId(id) };
       const updateDoc = { $set: updateTask };
 
       try {
         const result = await taskCollection.updateOne(filter, updateDoc);
+        console.log("MongoDB Update Result:", result);
+
         if (result.matchedCount === 0) {
           return res.status(404).json({ error: "Task not found" });
         }
         res.json({ message: "Task updated successfully", result });
       } catch (error) {
-        console.error(error);
+        console.error("Update Error:", error);
         res.status(500).json({ error: "Failed to update task" });
       }
     });
